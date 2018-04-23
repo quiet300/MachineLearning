@@ -3,8 +3,13 @@
 import numpy as np
 import sys
 
+'''
+分别用贝努利，多项式，混合型对数据进行分类
+'''
+
 def createWordList(data):
     '''
+    去掉重复项，取得样本种类
     :param data:样本
     :return: 样本的种类
     '''
@@ -25,8 +30,7 @@ def word2Vec(wordList,inputWord):
             if word in wordList:
                 tempval[wordList.index(word)] = 1
         returnVec.append(tempval)
-    # print(wordList)
-    # print(returnVec)
+
     return returnVec
 
 def train_fit(train_data,train_label,feature,type=0):
@@ -47,6 +51,7 @@ def train_fit(train_data,train_label,feature,type=0):
 
     if type == 0:
         # 贝努利型
+        print('贝努利型')
         # 取得所有样本种类
         xlist = createWordList(train_data)
         classBianhuang = word2Vec(xlist, train_data)
@@ -141,19 +146,70 @@ def train_fit(train_data,train_label,feature,type=0):
             if maxPri < jisuangailv:
                 maxPri = jisuangailv
                 label = y_class[c]
-            print('分类是：',label, '  概率：',jisuangailv)
+            print('分类：', y_class[c], '  概率：', jisuangailv)
 
         return label
 
     elif type == 2:
         # 混合型
+        print('混合型')
 
+        # 用贝努利训练模型
+        # 取得所有样本种类
+        xlist = createWordList(train_data)
+        classBianhuang = word2Vec(xlist, train_data)
 
+        # 得到标签为1和1以外的样本个数
+        p1Denom = np.sum(np.equal(1, train_label))
+        p0Denom = len(train_label) - p1Denom
 
+        # 得到样本的个数
+        classnum = len(classBianhuang)
 
+        # 得到样本中1的概率
+        p1per = p1Denom / float(classnum)
 
+        # 避免一个概率值为0,最后的乘积也为0
+        p0Num = np.ones(len(xlist))
+        p1Num = np.ones(len(xlist))
 
-        pass
+        for i in range(classnum):
+            if train_label[i] == 1:
+                p1Num += classBianhuang[i]
+            else:
+                p0Num += classBianhuang[i]
+
+        p0Vect = p0Num / p0Denom
+        p1Vect = p1Num / p1Denom
+
+        tempval = [0] * len(xlist)
+
+        # 把[X1, X2]类型的样本转化成[0, 1, 0, 1, 0, 1]类型
+        for word in feature:
+            if word in xlist:
+                tempval[xlist.index(word)] = 1
+
+        # 用多项式预测
+
+        # 计算样本属于1的概率
+        px1per = p1per
+        for i in range(len(tempval)):
+            if tempval[i] == 1:
+                px1per *= p1Vect[i]
+        print('类别是1的概率：', px1per)
+
+        # 计算样本属于-1的概率
+        px0per = 1 - p1per
+        for i in range(len(tempval)):
+            if tempval[i] == 1:
+                px0per *= p0Vect[i]
+        print('类别是-1的概率：', px0per)
+
+        if px1per > px0per:
+            return 1
+        else:
+            return -1
+
     elif type == 3:
         # 朴素贝叶斯
         print('朴素贝叶斯')
@@ -199,11 +255,11 @@ def train_fit(train_data,train_label,feature,type=0):
                 else:
                     jisuangailv *= 1
                 i += 1
-
+            print('分类：', y_class[c], '  概率：', jisuangailv)
             if maxPri < jisuangailv:
                 maxPri = jisuangailv
                 label = y_class[c]
-            print('分类是：',label, '  概率：',jisuangailv)
+
         return label
 
 
@@ -219,13 +275,15 @@ if __name__ == '__main__':
     train_label = np.array([-1, -1, 1, 1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, -1])
 
     feature = np.array([2,4])
-    # 贝努利方法
-    # 数组需要转换
 
+    # 贝努利朴素贝叶斯
     print(train_fit(train_data, train_label, feature, type=0))
     print('*'*30)
-    # 多项式方法
-    print(train_fit(train_data, train_label,feature,type=1))
-    # print('*'*30)
+    # 多项式朴素贝叶斯
+    print(train_fit(train_data, train_label, feature,type=1))
+    print('*'*30)
+    # 混合朴素贝叶斯
+    print(train_fit(train_data, train_label, feature,type=2))
+    print('*'*30)
     # 朴素贝叶斯
-    # print(train_fit(train_data, train_label, feature, type=3))
+    print(train_fit(train_data, train_label, feature, type=3))
