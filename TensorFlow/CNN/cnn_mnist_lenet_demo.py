@@ -3,7 +3,7 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
-
+import sys
 
 # 数据加载
 mnist = input_data.read_data_sets('data/mnist', one_hot=True)
@@ -16,8 +16,10 @@ test_img = mnist.test.images
 test_label = mnist.test.labels
 train_sample_number = mnist.train.num_examples
 
-# 学习率(不能过大，否则可能不收敛，之前试过1.0和0.5都不收敛,0.05收敛到0.891,0.02收敛到0.893,0.001收敛到0.8045)
-learn_rate_set = 0.01
+# 学习率(不能过大，否则可能不收敛，)
+# GradientDescentOptimizer(随机梯度下降时)之前试过1.0和0.5都不收敛,0.05收敛到0.891,0.02收敛到0.893,0.001收敛到0.8045
+# 用AdamOptimizer做梯度下降的时候学习率不能设置太大，不然不收敛。0.0001的时候9次收敛到0.9010;21次测试集准确率0.9858
+learn_rate_set = 0.0001
 # 迭代训练样本数量
 batch_size = 100
 
@@ -45,8 +47,10 @@ def learn_rate_func(epoch):
     :param epoch:
     :return:
     """
-    # return learn_rate_set * (0.9 ** int(epoch / 10))
-    return learn_rate_set
+    if (epoch % 10 == 0):
+        return learn_rate_set * (0.9 ** int(epoch / 10))
+    else:
+        return learn_rate_set
 
 def le_net(x, y):
     '''
@@ -115,7 +119,7 @@ act = le_net(x, y)
 
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=act, labels=y))
 
-train = tf.train.GradientDescentOptimizer(learn_rate).minimize(cost)
+train = tf.train.AdamOptimizer(learn_rate).minimize(cost)
 
 pred = tf.equal(tf.argmax(act, axis=1), tf.argmax(y, axis=1))
 
@@ -161,7 +165,7 @@ with tf.Session() as sess:
             test_acc = sess.run(acc, feed_dict=feeds)
             print("测试准确率: %.4f" % test_acc)
 
-            if train_acc > 0.9 and test_acc > 0.9:
+            if train_acc > 0.95 and test_acc > 0.95:
                 saver.save(sess, './mnist/model')
                 break
         epoch += 1
@@ -169,9 +173,5 @@ with tf.Session() as sess:
     # 模型可视化输出
     writer = tf.summary.FileWriter('./mnist/graph', tf.get_default_graph())
     writer.close()
-
-
-
-
 
 
