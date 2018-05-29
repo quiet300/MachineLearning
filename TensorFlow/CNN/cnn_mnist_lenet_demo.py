@@ -115,63 +115,101 @@ def le_net(x, y):
 
     return act
 
-act = le_net(x, y)
-
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=act, labels=y))
-
-train = tf.train.AdamOptimizer(learn_rate).minimize(cost)
-
-pred = tf.equal(tf.argmax(act, axis=1), tf.argmax(y, axis=1))
-
-acc = tf.reduce_mean(tf.cast(pred, tf.float32))
-
-# 初始化
-init = tf.global_variables_initializer()
-
-with tf.Session() as sess:
-    sess.run(init)
-
-    # 模型保存、持久化
+def test_mnist(validation_feature, validation_label):
+    '''
+    预测
+    :param validation_feature:
+    :param validation_label:
+    :return:
+    '''
+    tmp_i = 4999
+    output = le_net(X, Y)
     saver = tf.train.Saver()
+    img = validation_feature[tmp_i]
+    label = validation_label[tmp_i]
 
-    epoch = 0
+    print('validation_label[tmp_i]==', label)
+    with tf.Session() as sess:
+        # 预测的时候不能初始化，或者说，载入模型之后不能再初始化，因为w和b已经存在了
+        # sess.run(tf.global_variables_initializer())
+        saver.restore(sess, "./mnist/model")
 
-    while True:
-        avg_cost = 0
-        # 计算出总的批次
-        total_batch = int(train_sample_number / batch_size)
+        predict = tf.argmax(output, axis=1)
+        text_list = sess.run(predict, feed_dict={X: [img], Y: [label]})
+        text = text_list[0].tolist()
+        return text
 
-        # 迭代更新
-        for i in range(total_batch):
-            # 获取x和y
-            batch_xs, batch_ys = mnist.train.next_batch(batch_size)
-            feeds = {x: batch_xs, y: batch_ys, learn_rate: learn_rate_func(epoch)}
-            # 模型训练
-            sess.run(train, feed_dict=feeds)
-            # 获取损失函数值
-            avg_cost += sess.run(cost, feed_dict=feeds)
 
-        # 重新计算平均损失(相当于计算每个样本的损失值)
-        avg_cost = avg_cost / total_batch
+if __name__ == '__main__':
+    train = 1
+    if train == 0:
 
-        # DISPLAY  显示误差率和训练集的正确率以此测试集的正确率
-        if (epoch + 1) % 1 == 0:
-            print("批次: %03d 损失函数值: %.9f" % (epoch, avg_cost))
-            # 这里之所以使用batch_xs和batch_ys，是因为我使用train_img会出现内存不够的情况，直接就会退出
-            feeds = {x: batch_xs, y: batch_ys, learn_rate: learn_rate_func(epoch)}
-            train_acc = sess.run(acc, feed_dict=feeds)
-            print("训练集准确率: %.4f" % train_acc)
-            feeds = {x: test_img, y: test_label, learn_rate: learn_rate_func(epoch)}
-            test_acc = sess.run(acc, feed_dict=feeds)
-            print("测试准确率: %.4f" % test_acc)
+        act = le_net(x, y)
 
-            if train_acc > 0.95 and test_acc > 0.95:
-                saver.save(sess, './mnist/model')
-                break
-        epoch += 1
+        cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=act, labels=y))
 
-    # 模型可视化输出
-    writer = tf.summary.FileWriter('./mnist/graph', tf.get_default_graph())
-    writer.close()
+        train = tf.train.AdamOptimizer(learn_rate).minimize(cost)
 
+        pred = tf.equal(tf.argmax(act, axis=1), tf.argmax(y, axis=1))
+
+        acc = tf.reduce_mean(tf.cast(pred, tf.float32))
+
+        # 初始化
+        init = tf.global_variables_initializer()
+
+        with tf.Session() as sess:
+            sess.run(init)
+
+            # 模型保存、持久化
+            saver = tf.train.Saver()
+
+            epoch = 0
+
+            while True:
+                avg_cost = 0
+                # 计算出总的批次
+                total_batch = int(train_sample_number / batch_size)
+
+                # 迭代更新
+                for i in range(total_batch):
+                    # 获取x和y
+                    batch_xs, batch_ys = mnist.train.next_batch(batch_size)
+                    feeds = {x: batch_xs, y: batch_ys, learn_rate: learn_rate_func(epoch)}
+                    # 模型训练
+                    sess.run(train, feed_dict=feeds)
+                    # 获取损失函数值
+                    avg_cost += sess.run(cost, feed_dict=feeds)
+
+                # 重新计算平均损失(相当于计算每个样本的损失值)
+                avg_cost = avg_cost / total_batch
+
+                # DISPLAY  显示误差率和训练集的正确率以此测试集的正确率
+                if (epoch + 1) % 1 == 0:
+                    print("批次: %03d 损失函数值: %.9f" % (epoch, avg_cost))
+                    # 这里之所以使用batch_xs和batch_ys，是因为我使用train_img会出现内存不够的情况，直接就会退出
+                    feeds = {x: batch_xs, y: batch_ys, learn_rate: learn_rate_func(epoch)}
+                    train_acc = sess.run(acc, feed_dict=feeds)
+                    print("训练集准确率: %.4f" % train_acc)
+                    feeds = {x: test_img, y: test_label, learn_rate: learn_rate_func(epoch)}
+                    test_acc = sess.run(acc, feed_dict=feeds)
+                    print("测试准确率: %.4f" % test_acc)
+
+                    if train_acc > 0.95 and test_acc > 0.95:
+                        saver.save(sess, './mnist/model')
+                        break
+                epoch += 1
+
+            # 模型可视化输出
+            writer = tf.summary.FileWriter('./mnist/graph', tf.get_default_graph())
+            writer.close()
+    if train == 1:
+        # 预测
+        validation_feature = mnist.validation.images
+        validation_label = mnist.validation.labels
+
+        X = tf.placeholder(dtype=tf.float32, shape=[None, 28*28])
+        Y = tf.placeholder(dtype=tf.float32, shape=[None, n_class])
+
+        v_y = test_mnist(validation_feature, validation_label)
+        print(v_y)
 
