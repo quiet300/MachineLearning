@@ -20,7 +20,7 @@ imgInfo = img.shape
 # 输出高宽通道数
 print(imgInfo)
 height = imgInfo[0]
-weight = imgInfo[1]
+width = imgInfo[1]
 # 读取图片如果flags是0的时候，是没有通道的
 mode = imgInfo[2]
 
@@ -30,14 +30,14 @@ mode = imgInfo[2]
 # 通过源码转换颜色(取均值，即（r+g+b）/3)
 # dst = np.zeros(imgInfo, np.uint8)
 # for i in range(0, height):
-#     for j in range(0, weight):
+#     for j in range(0, width):
 #         (b, g, r) = img[i, j]
 #         dst[i, j] = np.uint8((int(b) + int(g) + int(r)) / 3)
 
 # 通过源码转换颜色(通过参数，即（r*0.299+g*0.587+b*0.114)
 # dst = np.zeros(imgInfo, np.uint8)
 # for i in range(0, height):
-#     for j in range(0, weight):
+#     for j in range(0, width):
 #         (b, g, r) = img[i, j]
 #         b = int(b)
 #         g = int(g)
@@ -55,14 +55,14 @@ mode = imgInfo[2]
 # gray = cv2.cvtColor(img, code=cv2.COLOR_BGR2GRAY)
 # dst = np.zeros(imgInfo, dtype=np.uint8)
 # for i in range(0, height):
-#      for j in range(0, weight):
+#      for j in range(0, width):
 #         grayPixel = gray[i, j]
 #         dst[i, j] = 255 - grayPixel
 
 # 2. 彩色图片的颜色反转(255分别减bgr)
 # dst = np.zeros(imgInfo, dtype=np.uint8)
 # for i in range(0, height):
-#      for j in range(0, weight):
+#      for j in range(0, width):
 #         (b, g, r) = img[i, j]
 #         dst[i, j] = (255 - b, 255 - g, 255 - r)
 
@@ -86,7 +86,7 @@ mode = imgInfo[2]
 # dst = np.zeros(imgInfo, np.uint8)
 # mm = 8 # 水平或竖直方向是8
 # for i in range(0, height - mm):
-#     for j in range(0, weight - mm):
+#     for j in range(0, width - mm):
 #         # 取一个随机数
 #         index = int(random.random() * 8) #取一个0~8之间的随机数
 #         (b, g, r) = img[i + index, j + index]
@@ -100,12 +100,12 @@ mode = imgInfo[2]
 #
 # # ROI
 # roiH = int(height / 2)
-# roiW = int(weight / 2)
+# roiW = int(width / 2)
 # img0Roi = img0[0: roiH, 0:roiW]
 # imgRoi = img[0: roiH, 0:roiW]
 #
 # # dst = np.zeros([roiH, roiW, 3], np.uint8)
-# dst = cv2.addWeighted(imgRoi, 0.5, img0Roi, 0.5, 0)
+# dst = cv2.addwidthed(imgRoi, 0.5, img0Roi, 0.5, 0)
 
 '''
 边缘检测
@@ -124,9 +124,9 @@ mode = imgInfo[2]
 #  0 0 0            2 0 -2,
 # -1 -2 -1 ]       1 0 -1 ]
 # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-# dst = np.zeros((height, weight, 1), np.uint8)
+# dst = np.zeros((height, width, 1), np.uint8)
 # for i in range(0, height - 2):
-#     for j in range(0, weight - 2):
+#     for j in range(0, width - 2):
 #         # 2 图片卷积
 #         gy = gray[i, j] * 1 + gray[i, j + 1] * 2 + gray[i, j + 2] * 1 + gray[i + 2, j] * (-1) + gray[i + 2, j + 1] * (-2) + gray[i + 2, j + 2] * (-1)
 #         gx = gray[i, j] * 1 + gray[i + 1, j] * 2 + gray[i + 2, j] * 1 + gray[i, j + 2] * (-1) + gray[i + 1, j + 2] * (-2) + gray[i + 2, j + 2] * (-1)
@@ -142,9 +142,9 @@ mode = imgInfo[2]
 浮雕效果：
 '''
 # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-# dst = np.zeros((height, weight, 1), np.uint8)
+# dst = np.zeros((height, width, 1), np.uint8)
 # for i in range(0, height):
-#     for j in range(0, weight - 1):
+#     for j in range(0, width - 1):
 #         grayP0 = int(gray[i, j])
 #         grayP1 = int(gray[i, j + 1])
 #         # 两个像素的差加一个灰度(150的作用，增强图像的浮雕灰度等级)
@@ -160,9 +160,9 @@ mode = imgInfo[2]
 '''
 # 原图像
 # cv2.imshow(winname='img', mat=img)
-# dst = np.zeros((height, weight, 3), np.uint8)
+# dst = np.zeros((height, width, 3), np.uint8)
 # for i in range(0, height):
-#     for j in range(0, weight):
+#     for j in range(0, width):
 #         (b, g, r) = img[i, j]
 #         b = int(b) * 1.5
 #         g = int(g) * 1.3
@@ -178,7 +178,7 @@ mode = imgInfo[2]
 # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 # dst = np.zeros(imgInfo, np.uint8)
 # for i in range(4, height - 4):
-#     for j in range(4, weight - 4):
+#     for j in range(4, width - 4):
 #         # 我们想定义的灰度等级是8个，定义一个数组。
 #         array1 = np.zeros(8, np.uint8)
 #         for m in range(-4, 4):
@@ -258,10 +258,10 @@ mode = imgInfo[2]
 
 # 图片绘制
 newheight = int(img.shape[0] * 0.2)
-newweight = int(img.shape[1] * 0.2)
-imgResize = cv2.resize(img, (newweight, newheight))
+newwidth = int(img.shape[1] * 0.2)
+imgResize = cv2.resize(img, (newwidth, newheight))
 for i in range(0, newheight):
-    for j in range(0, newweight):
+    for j in range(0, newwidth):
         img[i + 200, j + 300] = imgResize[i, j]
 
 cv2.imshow(winname='dst', mat=img)

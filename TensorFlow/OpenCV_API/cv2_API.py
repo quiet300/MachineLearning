@@ -58,7 +58,7 @@ imgInfo = img.shape
 # 输出高宽通道数
 print(imgInfo)
 height = imgInfo[0]
-weight = imgInfo[1]
+width = imgInfo[1]
 mode = imgInfo[2]
 
 '''
@@ -67,10 +67,10 @@ mode = imgInfo[2]
   自由设定宽高就是非等比例缩放
 '''
 # dstHeight = int(height * 0.5)
-# dstweight = int(weight * 0.5)
+# dstwidth = int(width * 0.5)
 
 # 默认双线性插值
-# dst = cv2.resize(img, (dstweight, dstHeight))
+# dst = cv2.resize(img, (dstwidth, dstHeight))
 
 # 最近邻域插值
 
@@ -97,30 +97,30 @@ matShift = np.float32([[1, 0, 100], [0, 1, 200]])
     M：移位矩阵
     dsize：图片的info信息
 '''
-# dst = cv2.warpAffine(img, matShift, (height, weight))
+# dst = cv2.warpAffine(img, matShift, (height, width))
 # cv2.imshow(winname='img', mat=dst)
 
 # 代码实现（NO API）
 # dst = np.zeros(imgInfo, np.int8)
 # for i in range(0, height-200):
-#     for j in range(0, weight-100):
+#     for j in range(0, width-100):
 #         dst[i + 200, j+100] = img[i, j]
 # cv2.imshow(winname='img', mat=dst)
 
 # 图片镜像
-print('图片镜像:',height,weight)
-newInfo = (height*2, weight, mode)
+print('图片镜像:',height,width)
+newInfo = (height*2, width, mode)
 # 关于np.uint8的设置，图片中通常用uint8来设置颜色，不用int8，因为int8会失真
 # dst = np.zeros(newInfo, np.uint8)
 #
 # # 镜像图片
 # for i in range(0, height):
-#     for j in range(0, weight):
+#     for j in range(0, width):
 #         dst[i, j] = img[i, j]
 #         dst[height*2 - i - 1, j] = img[i, j]
 #
 # # 在图片的中轴上绘制一条直线
-# for i in range(0, weight):
+# for i in range(0, width):
 #     dst[height, i] = (0, 0, 255)
 #
 # cv2.imshow(winname='img', mat=dst)
@@ -130,20 +130,20 @@ newInfo = (height*2, weight, mode)
   把原图片的坐标点映射到新的坐标上（左上角，左下角，右上角）
 '''
 # 原图片设置为整个图片
-# matsrc = np.float32([[0, 0], [0, height - 1], [weight - 1, 0]])
+# matsrc = np.float32([[0, 0], [0, height - 1], [width - 1, 0]])
 # # 要仿射到的位置
-# matdst = np.float32([[50, 50], [100, height - 150], [weight - 100, 100]])
+# matdst = np.float32([[50, 50], [100, height - 150], [width - 100, 100]])
 #
 # # 组合
 # matAffine = cv2.getAffineTransform(src=matsrc, dst=matdst)
 #
-# dst = cv2.warpAffine(img, matAffine, (height, weight))
+# dst = cv2.warpAffine(img, matAffine, (height, width))
 # cv2.imshow(winname='dst', mat=dst)
 
 # 图片旋转
 # center:中心点 angle: 旋转的角度 scale:缩放的系数(如果不缩放，旋转后的图片可能超出可观察的范围)
-matrorate = cv2.getRotationMatrix2D(center=(height*0.5, weight*0.5), angle=45, scale=0.5)
-dst = cv2.warpAffine(img, matrorate, (height, weight))
+matrorate = cv2.getRotationMatrix2D(center=(height*0.5, width*0.5), angle=45, scale=0.5)
+dst = cv2.warpAffine(img, matrorate, (height, width))
 cv2.imshow(winname='dst', mat=dst)
 
 '''
